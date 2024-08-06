@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
-from time import sleep
+from time import sleep, time
+import time
 
 # Configuración de los pines
 GPIO.setmode(GPIO.BOARD)
@@ -11,7 +12,9 @@ LCD_D4 = 18
 LCD_D5 = 22
 LCD_D6 = 29
 LCD_D7 = 31
-
+# Pines de luz
+boton_pin = 32 #in donde está conectado el botón
+led_pin = 33#n donde está conectado el LED
 # Pines para la contraseña
 BTN_1 = 7   # SECCION B
 BTN_2 = 11  # CARACTER 3
@@ -35,6 +38,9 @@ GPIO.setup(BTN_1, GPIO.IN)
 GPIO.setup(BTN_2, GPIO.IN)
 GPIO.setup(BTN_3, GPIO.IN)
 GPIO.setup(BTN_4, GPIO.IN)
+GPIO.setup(boton_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
+    
+
 
 # Configuración de los pines del LCD
 GPIO.setup(LCD_E, GPIO.OUT)  # E
@@ -42,7 +48,8 @@ GPIO.setup(LCD_RS, GPIO.OUT) # RS
 GPIO.setup(LCD_D4, GPIO.OUT) # DB4
 GPIO.setup(LCD_D5, GPIO.OUT) # DB5
 GPIO.setup(LCD_D6, GPIO.OUT) # DB6
-GPIO.setup(LCD_D7, GPIO.OUT) # DB7    
+GPIO.setup(LCD_D7, GPIO.OUT) # DB7  
+GPIO.setup(led_pin, GPIO.OUT)  
 
 def lcd_init():
     # Inicializar pantalla
@@ -92,11 +99,39 @@ def lcd_string(message, line):
     for char in message:
         lcd_byte(ord(char), LCD_CHR)
 
+def On_off():
+    GPIO.setup(boton_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
+    GPIO.setup(led_pin, GPIO.OUT)
+
+
+    led_estado = False
+    GPIO.output(led_pin, led_estado)
+
+    try:
+        while True:
+# Leer el estado del botón
+            boton_presionado = not GPIO.input(boton_pin)
+
+            if boton_presionado:
+# Cambiar el estado del LED
+                led_estado = not led_estado
+                GPIO.output(led_pin, led_estado)
+
+# Esperar un tiempo para evitar rebotes del botón
+                sleep(0.5)
+
+# Pequeña pausa para no saturar el CPU
+            sleep(0.01)
+
+    except KeyboardInterrupt:
+# Limpiar configuración GPIO al finalizar el programa
+        pass
+
 def main():
     lcd_init()
     lcd_string("BIENVENIDO", LCD_LINE_1)
     lcd_string("INGRESE PATRON", LCD_LINE_2)
-
+    
     try:
         patron = 'B03'
         patron_guardado = ''
@@ -125,8 +160,10 @@ def main():
                 lcd_string(patron_guardado, LCD_LINE_1)
                 sleep(0.1)
                 if patron_guardado == patron:
+                    
                     print("Patron correcto")
                     lcd_string("PATRON CORRECTO", LCD_LINE_2)
+                    
                     break
                 else:
                     print("Patron incorrecto")
@@ -136,6 +173,7 @@ def main():
         print("Bienvenido a su casa")
         lcd_string("BIENVENIDO", LCD_LINE_1)
         lcd_string("A TU CASA :D", LCD_LINE_2)
+        On_off()
 
         # Mantener el mensaje en la pantalla
         while True:
