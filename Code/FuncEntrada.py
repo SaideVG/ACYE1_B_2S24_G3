@@ -58,6 +58,12 @@ BTN_4 = 13  # TECLA ENTER
 MOTOR_1 = 36
 MOTOR_2 = 35
 
+#Pines para el funcionamiento del sensor de flama
+flame_Sensor = 37
+red_light = 38
+buzzer = 40
+
+
 # Constantes de la pantalla LCD
 LCD_WIDTH = 16    # Máximo caracteres por línea
 LCD_CHR = True    # Modo carácter
@@ -89,6 +95,30 @@ GPIO.setup(LCD_D5, GPIO.OUT) # DB5
 GPIO.setup(LCD_D6, GPIO.OUT) # DB6
 GPIO.setup(LCD_D7, GPIO.OUT) # DB7  
 GPIO.setup(led_pin, GPIO.OUT)  
+
+# Configuracion de pines 
+
+GPIO.setup(flame_Sensor, GPIO.IN)
+GPIO.setup(red_light, GPIO.OUT)
+GPIO.setup(buzzer, GPIO.OUT)
+
+
+def flame_detection():
+    try:
+        while True:
+            if GPIO.input(flame_Sensor):
+                lcd_string("Flame Detected  ", LCD_LINE_1)
+                GPIO.output(buzzer, True)
+                GPIO.output(red_light, True)
+            else:
+                lcd_string("Flame Not Detected  ", LCD_LINE_1)
+                GPIO.output(buzzer, False)
+                GPIO.output(red_light, False)
+            sleep(1)
+    except KeyboardInterrupt:
+        GPIO.cleanup()
+
+
 
 def lcd_init():
     # Inicializar pantalla
@@ -167,6 +197,7 @@ def On_off():
             lcd_string("Temperatura actual", LCD_LINE_1)
             lcd_string(str(temp) + "o", LCD_LINE_2)
             funcionar_motor(temp)
+            flame_detection()
 	    
 
     except KeyboardInterrupt:
@@ -177,6 +208,13 @@ def main():
     lcd_init()
     lcd_string("BIENVENIDO", LCD_LINE_1)
     lcd_string("INGRESE PATRON", LCD_LINE_2)
+    
+    #while True:
+      #temp_level = ReadChannel(channel_temp) 
+      #la combierto a Grados Centigrados
+      #temp      = 	ConvertTemp(temp_level,2)
+      #print(str(temp))
+      #sleep(1)
     
     try:
         patron = 'B03'
@@ -224,13 +262,12 @@ def main():
         lcd_string("", LCD_LINE_1)
         lcd_string("", LCD_LINE_2)
 	
-        On_off()
-
-        # Mantener el mensaje en la pantalla
+        On_off()        # Mantener el mensaje en la pantalla
         while True:
             sleep(1)
 
     except KeyboardInterrupt:
+    
         GPIO.cleanup()
 
 def funcionar_motor(temp):
