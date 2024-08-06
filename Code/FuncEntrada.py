@@ -1,6 +1,39 @@
 import RPi.GPIO as GPIO
 from time import sleep, time
 import time
+import spidev
+
+#Variables para el funcionamiento del controlador de la temperatura
+spi = spidev.SpiDev()
+spi.open(0,0)
+
+#puerto de la temperatura CH0
+channel_temp = 0
+
+#funcion para leer el puerto
+def ReadChannel(channel):
+  adc = spi.xfer2([1,(8+channel)<<4,0])
+  data = ((adc[1]&3) << 8) + adc[2]
+  return data
+
+#funcion para convertir el voltaje recibido a temperatura
+def ConvertTemp(data,places):
+ 
+  # ADC Value
+  # (approx)  Temp  Volts
+  #    0      -50    0.00
+  #   78      -25    0.25
+  #  155        0    0.50
+  #  233       25    0.75
+  #  310       50    1.00
+  #  465      100    1.50
+  #  775      200    2.50
+  # 1023      280    3.30
+ 
+  temp = ((data * 330)/float(1023))
+  temp = round(temp,places)
+  return temp
+ 
 
 # Configuración de los pines
 GPIO.setmode(GPIO.BOARD)
@@ -21,6 +54,10 @@ BTN_2 = 11  # CARACTER 3
 BTN_3 = 12  # GRUPO 3
 BTN_4 = 13  # TECLA ENTER
 
+#PIN PARA FUNCIONAMIENTO DEL MOTOR
+MOTOR_1 = 36
+MOTOR_2 = 35
+
 # Constantes de la pantalla LCD
 LCD_WIDTH = 16    # Máximo caracteres por línea
 LCD_CHR = True    # Modo carácter
@@ -40,7 +77,9 @@ GPIO.setup(BTN_3, GPIO.IN)
 GPIO.setup(BTN_4, GPIO.IN)
 GPIO.setup(boton_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
     
-
+#CONFIGURACION DE PINES DE FUNCIOAMIENTO DEL MOTOR
+GPIO.setup(MOTOR_2, GPIO.OUT)
+GPIO.setup(MOTOR_1, GPIO.OUT)
 
 # Configuración de los pines del LCD
 GPIO.setup(LCD_E, GPIO.OUT)  # E
@@ -113,15 +152,22 @@ def On_off():
             boton_presionado = not GPIO.input(boton_pin)
 
             if boton_presionado:
-# Cambiar el estado del LED
+                # Cambiar el estado del LED
                 led_estado = not led_estado
                 GPIO.output(led_pin, led_estado)
 
-# Esperar un tiempo para evitar rebotes del botón
+                # Esperar un tiempo para evitar rebotes del botón
                 sleep(0.5)
 
-# Pequeña pausa para no saturar el CPU
+            # Pequeña pausa para no saturar el CPU
             sleep(0.01)
+	    
+            temp_level = ReadChannel(channel_temp) 
+            temp      = 	ConvertTemp(temp_level,2)
+            lcd_string("Temperatura actual", LCD_LINE_1)
+            lcd_string(str(temp) + "o", LCD_LINE_2)
+            funcionar_motor(temp)
+	    
 
     except KeyboardInterrupt:
 # Limpiar configuración GPIO al finalizar el programa
@@ -170,9 +216,14 @@ def main():
                     lcd_string("PATRON INCORRECTO", LCD_LINE_2)
                 sleep(0.5)
 
-        print("Bienvenido a su casa")
+        
         lcd_string("BIENVENIDO", LCD_LINE_1)
         lcd_string("A TU CASA :D", LCD_LINE_2)
+        sleep(1)
+	
+        lcd_string("", LCD_LINE_1)
+        lcd_string("", LCD_LINE_2)
+	
         On_off()
 
         # Mantener el mensaje en la pantalla
@@ -182,5 +233,20 @@ def main():
     except KeyboardInterrupt:
         GPIO.cleanup()
 
+def funcionar_motor(temp):
+    if temp > 27:
+        GPIO.output(MOTOR_1 , GPIO.HIGH)
+        GPIO.output(MOTOR_2, GPIO.LOW)
+        sleep(0.5)
+        GPIO.output(MOTOR_1 , GPIO.LOW)
+        GPIO.output(MOTOR_2, GPIO.HIGH)
+        sleep(0.5)
+    else: 
+        GPIO.output(MOTOR_2, GPIO.LOW)
+        GPIO.output(MOTOR_1, GPIO.LOW)
+	
+	
 if __name__ == '__main__':
     main()
+
+    
