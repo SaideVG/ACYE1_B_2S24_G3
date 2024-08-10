@@ -1,76 +1,63 @@
 import RPi.GPIO as GPIO
 from time import sleep, time
-import time
 import spidev
 
-#Variables para el funcionamiento del controlador de la temperatura
+# Variables para el funcionamiento del controlador de la temperatura
 spi = spidev.SpiDev()
-spi.open(0,0)
+spi.open(0, 0)
 
-#puerto de la temperatura CH0
+# Puerto de la temperatura CH0
 channel_temp = 0
 
-#funcion para leer el puerto
+# Función para leer el puerto
 def ReadChannel(channel):
-  adc = spi.xfer2([1,(8+channel)<<4,0])
-  data = ((adc[1]&3) << 8) + adc[2]
-  return data
+    adc = spi.xfer2([1, (8 + channel) << 4, 0])
+    data = ((adc[1] & 3) << 8) + adc[2]
+    return data
 
-#funcion para convertir el voltaje recibido a temperatura
-def ConvertTemp(data,places):
- 
-  # ADC Value
-  # (approx)  Temp  Volts
-  #    0      -50    0.00
-  #   78      -25    0.25
-  #  155        0    0.50
-  #  233       25    0.75
-  #  310       50    1.00
-  #  465      100    1.50
-  #  775      200    2.50
-  # 1023      280    3.30
- 
-  temp = ((data * 330)/float(1023))
-  temp = round(temp,places)
-  return temp
- 
+# Función para convertir el voltaje recibido a temperatura
+def ConvertTemp(data, places):
+    temp = ((data * 330) / float(1023))
+    temp = round(temp, places)
+    return temp
 
 # Configuración de los pines
 GPIO.setmode(GPIO.BOARD)
 
 # Pines para el LCD
 LCD_RS = 15
-LCD_E  = 16
+LCD_E = 16
 LCD_D4 = 18
 LCD_D5 = 22
 LCD_D6 = 29
 LCD_D7 = 31
+
 # Pines de luz
-boton_pin = 32 #in donde está conectado el botón
-led_pin = 33#n donde está conectado el LED
+boton_pin = 32  # en donde está conectado el botón
+led_pin = 33  # en donde está conectado el LED
+
 # Pines para la contraseña
 BTN_1 = 7   # SECCION B
 BTN_2 = 11  # CARACTER 3
 BTN_3 = 12  # GRUPO 3
 BTN_4 = 13  # TECLA ENTER
 
-#PIN PARA FUNCIONAMIENTO DEL MOTOR
+# PIN PARA FUNCIONAMIENTO DEL MOTOR
 MOTOR_1 = 36
 MOTOR_2 = 35
 
-#Pines para el funcionamiento del sensor de flama
+# Pines para el funcionamiento del sensor de flama
 flame_Sensor = 37
-red_light = 38
+btn_on_off_buzzer = 38
 buzzer = 40
-
 
 # Constantes de la pantalla LCD
 LCD_WIDTH = 16    # Máximo caracteres por línea
 LCD_CHR = True    # Modo carácter
 LCD_CMD = False   # Modo comando
 
-LCD_LINE_1 = 0x80 # Dirección de RAM LCD para la 1ª línea
-LCD_LINE_2 = 0xC0 # Dirección de RAM LCD para la 2ª línea
+LCD_LINE_1 = 0x80  # Dirección de RAM LCD para la 1ª línea
+LCD_LINE_2 = 0xC0  # Dirección de RAM LCD para la 2ª línea
 
 # Constantes de tiempo
 E_PULSE = 0.0005
@@ -81,9 +68,9 @@ GPIO.setup(BTN_1, GPIO.IN)
 GPIO.setup(BTN_2, GPIO.IN)
 GPIO.setup(BTN_3, GPIO.IN)
 GPIO.setup(BTN_4, GPIO.IN)
-GPIO.setup(boton_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
-    
-#CONFIGURACION DE PINES DE FUNCIOAMIENTO DEL MOTOR
+GPIO.setup(boton_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+# CONFIGURACION DE PINES DE FUNCIONAMIENTO DEL MOTOR
 GPIO.setup(MOTOR_2, GPIO.OUT)
 GPIO.setup(MOTOR_1, GPIO.OUT)
 
@@ -93,32 +80,22 @@ GPIO.setup(LCD_RS, GPIO.OUT) # RS
 GPIO.setup(LCD_D4, GPIO.OUT) # DB4
 GPIO.setup(LCD_D5, GPIO.OUT) # DB5
 GPIO.setup(LCD_D6, GPIO.OUT) # DB6
-GPIO.setup(LCD_D7, GPIO.OUT) # DB7  
-GPIO.setup(led_pin, GPIO.OUT)  
+GPIO.setup(LCD_D7, GPIO.OUT) # DB7
+GPIO.setup(led_pin, GPIO.OUT)
 
-# Configuracion de pines 
-
+# Configuración de pines
 GPIO.setup(flame_Sensor, GPIO.IN)
-GPIO.setup(red_light, GPIO.OUT)
+GPIO.setup(btn_on_off_buzzer, GPIO.IN)
 GPIO.setup(buzzer, GPIO.OUT)
 
-
-def flame_detection():
-    try:
-        while True:
-            if GPIO.input(flame_Sensor):
-                lcd_string("Flame Detected  ", LCD_LINE_1)
-                GPIO.output(buzzer, True)
-                GPIO.output(red_light, True)
-            else:
-                lcd_string("Flame Not Detected  ", LCD_LINE_1)
-                GPIO.output(buzzer, False)
-                GPIO.output(red_light, False)
-            sleep(1)
-    except KeyboardInterrupt:
-        GPIO.cleanup()
-
-
+def flame_detection(off_buzzer):
+    if GPIO.input(flame_Sensor) and not off_buzzer:
+        lcd_string("Flame Detected  ", LCD_LINE_1)
+        GPIO.output(buzzer, True)
+    else:
+        lcd_string("Flame Not Detected  ", LCD_LINE_1)
+        GPIO.output(buzzer, False)
+        
 
 def lcd_init():
     # Inicializar pantalla
@@ -169,16 +146,20 @@ def lcd_string(message, line):
         lcd_byte(ord(char), LCD_CHR)
 
 def On_off():
-    GPIO.setup(boton_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
+    GPIO.setup(boton_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(led_pin, GPIO.OUT)
-
 
     led_estado = False
     GPIO.output(led_pin, led_estado)
 
     try:
+        last_flame_check = time()
+        flame_check_interval = 1  # Intervalo de revisión de flama en segundos
+        off_buzzer = False
+	
+
         while True:
-# Leer el estado del botón
+            # Leer el estado del botón
             boton_presionado = not GPIO.input(boton_pin)
 
             if boton_presionado:
@@ -191,31 +172,31 @@ def On_off():
 
             # Pequeña pausa para no saturar el CPU
             sleep(0.01)
-	    
-            temp_level = ReadChannel(channel_temp) 
-            temp      = 	ConvertTemp(temp_level,2)
+
+            temp_level = ReadChannel(channel_temp)
+            temp = ConvertTemp(temp_level, 2)
             lcd_string("Temperatura actual", LCD_LINE_1)
             lcd_string(str(temp) + "o", LCD_LINE_2)
             funcionar_motor(temp)
-            flame_detection()
 	    
+            if GPIO.input(btn_on_off_buzzer):
+                off_buzzer = not off_buzzer
+                sleep(0.5)
+
+            # Llamar a la detección de flama a intervalos regulares
+            if time() - last_flame_check >= flame_check_interval :
+                flame_detection(off_buzzer)
+                last_flame_check = time()
+            
 
     except KeyboardInterrupt:
-# Limpiar configuración GPIO al finalizar el programa
-        pass
+        GPIO.cleanup()
 
 def main():
     lcd_init()
     lcd_string("BIENVENIDO", LCD_LINE_1)
     lcd_string("INGRESE PATRON", LCD_LINE_2)
-    
-    #while True:
-      #temp_level = ReadChannel(channel_temp) 
-      #la combierto a Grados Centigrados
-      #temp      = 	ConvertTemp(temp_level,2)
-      #print(str(temp))
-      #sleep(1)
-    
+
     try:
         patron = 'B03'
         patron_guardado = ''
@@ -244,46 +225,33 @@ def main():
                 lcd_string(patron_guardado, LCD_LINE_1)
                 sleep(0.1)
                 if patron_guardado == patron:
-                    
                     print("Patron correcto")
                     lcd_string("PATRON CORRECTO", LCD_LINE_2)
-                    
                     break
                 else:
                     print("Patron incorrecto")
                     lcd_string("PATRON INCORRECTO", LCD_LINE_2)
                 sleep(0.5)
 
-        
         lcd_string("BIENVENIDO", LCD_LINE_1)
         lcd_string("A TU CASA :D", LCD_LINE_2)
         sleep(1)
-	
+
         lcd_string("", LCD_LINE_1)
         lcd_string("", LCD_LINE_2)
-	
-        On_off()        # Mantener el mensaje en la pantalla
-        while True:
-            sleep(1)
+
+        On_off()
 
     except KeyboardInterrupt:
-    
         GPIO.cleanup()
 
 def funcionar_motor(temp):
     if temp > 27:
-        GPIO.output(MOTOR_1 , GPIO.HIGH)
+        GPIO.output(MOTOR_1, GPIO.HIGH)
         GPIO.output(MOTOR_2, GPIO.LOW)
-        sleep(0.5)
-        GPIO.output(MOTOR_1 , GPIO.LOW)
-        GPIO.output(MOTOR_2, GPIO.HIGH)
-        sleep(0.5)
-    else: 
-        GPIO.output(MOTOR_2, GPIO.LOW)
+    else:
         GPIO.output(MOTOR_1, GPIO.LOW)
-	
-	
+        GPIO.output(MOTOR_2, GPIO.LOW)
+
 if __name__ == '__main__':
     main()
-
-    
