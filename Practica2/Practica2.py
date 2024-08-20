@@ -158,4 +158,13 @@ def main():
     except KeyboardInterrupt:
         GPIO.cleanup()
 
-        
+def funcionar_motor(temp):
+    if temp > 27:
+        GPIO.output(MOTOR_1, GPIO.HIGH)
+        GPIO.output(MOTOR_2, GPIO.LOW)
+    else:
+        GPIO.output(MOTOR_1, GPIO.LOW)
+        GPIO.output(MOTOR_2, GPIO.LOW)
+
+if __name__ == '__main__':
+    main()
