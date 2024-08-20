@@ -112,3 +112,50 @@ def On_off():
 
     except KeyboardInterrupt:
         GPIO.cleanup()
+
+def main():
+    lcd.lcd_display_string("Bienvenido", 1)
+    lcd.lcd_display_string("Ingresa Patron", 2)
+
+    try:
+        patron = 'B03'
+        patron_guardado = ''
+
+        while True:
+            if GPIO.input(BTN_1):
+                patron_guardado += 'B'
+                lcd.lcd_display_string(patron_guardado, 2)
+                sleep(0.5)
+
+            if GPIO.input(BTN_2):
+                patron_guardado += '0'
+                lcd.lcd_display_string(patron_guardado, 2)
+                sleep(0.5)
+
+            if GPIO.input(BTN_3):
+                patron_guardado += '3'
+                lcd.lcd_display_string(patron_guardado, 2)
+                sleep(0.5)
+
+            if GPIO.input(BTN_4):
+                lcd.lcd_display_string(patron_guardado, 1)
+                sleep(0.1)
+                if patron_guardado == patron:
+                    lcd.lcd_display_string("Patron correcto", 2)
+                    break
+                else:
+                    lcd.lcd_display_string("Patron incorrecto", 2)
+                sleep(0.5)
+
+        lcd.lcd_display_string("Bienvenido", 1)
+        lcd.lcd_display_string("A tu casa :D", 2)
+        sleep(1)
+
+        lcd.lcd_clear()
+
+        On_off()
+
+    except KeyboardInterrupt:
+        GPIO.cleanup()
+
+        
