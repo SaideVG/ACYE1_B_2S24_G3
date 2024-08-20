@@ -61,3 +61,54 @@ GPIO.setup(led_pin, GPIO.OUT)
 GPIO.setup(flame_Sensor, GPIO.IN)
 GPIO.setup(btn_on_off_buzzer, GPIO.IN)
 GPIO.setup(buzzer, GPIO.OUT)
+
+def flame_detection(off_buzzer):
+    if GPIO.input(flame_Sensor) and not off_buzzer:
+        lcd.lcd_display_string("Llama detectada", 1)
+        GPIO.output(buzzer, True)
+    else:
+        lcd.lcd_display_string("Llama no detectada", 1)
+        GPIO.output(buzzer, False)
+
+def On_off():
+    GPIO.setup(boton_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(led_pin, GPIO.OUT)
+
+    led_estado = False
+    GPIO.output(led_pin, led_estado)
+
+    try:
+        last_flame_check = time()
+        flame_check_interval = 1  # Intervalo de revisión de flama en segundos
+        off_buzzer = False
+
+        while True:
+            # Leer el estado del botón
+            boton_presionado = not GPIO.input(boton_pin)
+
+            if boton_presionado:
+                # Cambiar el estado del LED
+                led_estado = not led_estado
+                GPIO.output(led_pin, led_estado)
+                sleep(0.5)  # Esperar un tiempo para evitar rebotes del botón
+
+            # Pequeña pausa para no saturar el CPU
+            sleep(0.01)
+
+            temp_level = ReadChannel(channel_temp)
+            temp = ConvertTemp(temp_level, 2)
+            lcd.lcd_display_string(f"Temperatura: {temp}C", 1)
+
+            funcionar_motor(temp)
+            
+            if GPIO.input(btn_on_off_buzzer):
+                off_buzzer = not off_buzzer
+                sleep(0.5)
+
+            # Llamar a la detección de flama a intervalos regulares
+            if time() - last_flame_check >= flame_check_interval:
+                flame_detection(off_buzzer)
+                last_flame_check = time()
+
+    except KeyboardInterrupt:
+        GPIO.cleanup()
