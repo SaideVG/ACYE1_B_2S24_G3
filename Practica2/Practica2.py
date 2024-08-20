@@ -46,3 +46,18 @@ MOTOR_2 = 19  # GPIO 19
 flame_Sensor = 5    # GPIO 5
 btn_on_off_buzzer = 6  # GPIO 6
 buzzer = 21   # GPIO 21
+
+# Configuración de los pines de entrada y salida
+GPIO.setup(BTN_1, GPIO.IN)
+GPIO.setup(BTN_2, GPIO.IN)
+GPIO.setup(BTN_3, GPIO.IN)
+GPIO.setup(BTN_4, GPIO.IN)
+GPIO.setup(boton_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+# Configuración de pines de motor y buzzer
+GPIO.setup(MOTOR_2, GPIO.OUT)
+GPIO.setup(MOTOR_1, GPIO.OUT)
+GPIO.setup(led_pin, GPIO.OUT)
+GPIO.setup(flame_Sensor, GPIO.IN)
+GPIO.setup(btn_on_off_buzzer, GPIO.IN)
+GPIO.setup(buzzer, GPIO.OUT)
