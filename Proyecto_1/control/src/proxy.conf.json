@@ -1,0 +1,7 @@
+{
+    "/data": {
+    "target": "https://us-east-1.aws.data.mongodb-api.com/app/data-uvdudur/endpoint/data/v1/action",
+    "secure": false,
+    "changeOrigin": true
+    }
+}
