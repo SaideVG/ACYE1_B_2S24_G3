@@ -1,0 +1,107 @@
+<div class="flex justify-center items-center">
+    <ngb-datepicker #dp [(ngModel)]="model"  (dateSelect)="onDateSelection('from', $event)" (navigate)="date = $event.next" />
+    <ngb-datepicker #dp [(ngModel)]="model2"  (dateSelect)="onDateSelection('to', $event)" (navigate)="date = $event.next" />
+</div>
+<br>
+<div class="grid grid-cols-2 text-white">
+
+    <div class="relative overflow-y-scroll sm:rounded-lg h-96">
+        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Acción
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Fecha
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of data_completa" class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white" >
+                        {{ item.accion }} - 
+                        <span [ngClass]="item.on_off == 'ON' ? 'text-green-500' : 'text-red-500'"> {{ item.on_off == "ON" ? 'Encendido' : 'Apagado' }} </span>
+                        
+                    </th>
+                    <td class="px-6 py-4">
+                        {{ item.fecha_texto }}
+                    </td>                   
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <ng-container *ngIf="Line_chartOptions">
+        <apx-chart #chart
+            [series]="Line_chartOptions.series"
+            [chart]="Line_chartOptions.chart"
+            [xaxis]="Line_chartOptions.xaxis"
+            [title]="Line_chartOptions.title"
+            [stroke]="Line_chartOptions.stroke"
+            [dataLabels]="Line_chartOptions.dataLabels"
+            [legend]="Line_chartOptions.legend"
+            [markers]="Line_chartOptions.markers"
+            [tooltip]="Line_chartOptions.tooltip"
+            [grid]="Line_chartOptions.grid"
+        ></apx-chart>
+    </ng-container>
+    
+    
+    <ng-container *ngIf="bar_chartOptions">
+        <apx-chart
+            [series]="bar_chartOptions.series"
+            [chart]="bar_chartOptions.chart"
+            [xaxis]="bar_chartOptions.xaxis"
+            [title]="bar_chartOptions.title"
+            [stroke]="bar_chartOptions.stroke"
+            [dataLabels]="bar_chartOptions.dataLabels"
+            [legend]="bar_chartOptions.legend"
+            [markers]="bar_chartOptions.markers"
+            [tooltip]="bar_chartOptions.tooltip"
+            [grid]="bar_chartOptions.grid"
+            [autoUpdateSeries]="true"
+        ></apx-chart>
+    </ng-container>
+
+  <ng-container *ngIf="ingresos_chartOptions">
+    <apx-chart
+        [series]="ingresos_chartOptions.series"
+        [chart]="ingresos_chartOptions.chart"
+        [xaxis]="ingresos_chartOptions.xaxis"
+        [title]="ingresos_chartOptions.title"
+        [stroke]="ingresos_chartOptions.stroke"
+        [dataLabels]="ingresos_chartOptions.dataLabels"
+        
+        [markers]="ingresos_chartOptions.markers"
+        [tooltip]="ingresos_chartOptions.tooltip"
+        [grid]="ingresos_chartOptions.grid"
+        [fill]="ingresos_chartOptions.fill"
+        [plotOptions]="ingresos_chartOptions.plotOptions"
+        [autoUpdateSeries]="true"
+    ></apx-chart>
+  </ng-container>
+
+  <div *ngIf="range_bar_chartOptions">
+    <apx-chart
+        [series]="range_bar_chartOptions.series_2"
+        [chart]="range_bar_chartOptions.chart"
+        [xaxis]="range_bar_chartOptions.xaxis"
+        [title]="range_bar_chartOptions.title"
+        [stroke]="range_bar_chartOptions.stroke"
+        
+        [labels]="range_bar_chartOptions.labels!"
+        [legend]="range_bar_chartOptions.legend"
+        [markers]="range_bar_chartOptions.markers"
+        [tooltip]="range_bar_chartOptions.tooltip"
+        [grid]="range_bar_chartOptions.grid"
+        [fill]="range_bar_chartOptions.fill"
+        [plotOptions]="range_bar_chartOptions.plotOptions"
+    ></apx-chart>
+  </div>
+
+  
+
+
+  
+</div>

@@ -1,0 +1,61 @@
+<div class="flex justify-center items-center pt-32">
+    <!-- <div class="pb-8 pt-5 px-8 bg-slate-800 rounded-md">
+        <div class="font-mono flex justify-center items-center flex-col">
+            <div class="text-4xl font-bold">Iniciar Sesión</div>
+            <div class="text-2xl">
+                Control <i class="fa-solid fa-house-laptop"></i>
+            </div>
+        </div>
+        <div class="flex flex-col gap-4 pt-5">
+            <label for="user">
+                Usuario <i class="fa-solid fa-user"></i> 
+            </label>
+            <input type="text" class="bg-slate-500 rounded-md border-2 border-slate-400 w-full outline-none p-1" id="user">
+            <label for="password">
+                Constraseña <i class="fa-solid fa-key"></i>
+            </label>
+            <input type="password" class="bg-slate-500 rounded-md border-2 border-slate-400 w-full outline-none p-1" id="password">
+            <button type="button" class="p-2 rounded-md bg-slate-500 hover:bg-green-800 active:bg-green-600 outline-none">Ingresar</button>
+        </div>
+    </div> -->
+    
+    <div class="max-w-lg w-full">
+        <div style="box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);"
+            class="bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+            <div class="p-8">
+                <h2 class="text-center text-4xl font-extrabold text-white font-mono">
+                    Iniciar Sesión
+                </h2>
+                <p class="mt-4 text-center text-gray-400">Control <i class="fa-solid fa-house-laptop"></i> </p>
+                <div class="mt-8 space-y-6">
+                    <div class="rounded-md shadow-sm">
+                        <div>
+                            <label class="sr-only" for="user">Usuario</label>
+                            <input placeholder="Usuario"
+                                class="appearance-none relative block w-full px-3 py-3 border border-gray-700 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                required=""  name="user" id="user" [(ngModel)]="txt_usuario" />
+                        </div>
+                        <div class="mt-4">
+                            <label class="sr-only" for="password">Contraseña</label>
+                            <input placeholder="Contraseña"
+                                class="appearance-none relative block w-full px-3 py-3 border border-gray-700 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                required=""  type="password" name="password" [(ngModel)]="txt_password"
+                                id="password" />
+                        </div>
+                    </div>
+                    <div>
+                        <button
+                            class="relative w-full flex justify-center items-center py-3 px-4 border border-transparent text-sm gap-2 font-medium rounded-md text-white bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 active:ring-indigo-500"
+                            (click)="logear()">
+                            Ingresar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="px-8 py-4 bg-gray-700 text-center">
+                <span class="text-gray-400">Al ingresar tendras acceso a todos los componentes de la casa.</span>
+            </div>
+        </div>
+    </div>
+
+</div>

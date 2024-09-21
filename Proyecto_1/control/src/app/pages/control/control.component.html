@@ -1,0 +1,172 @@
+
+<div *ngIf="!is_loged">
+    <app-login (loged)="loged($event)"></app-login>
+</div>
+
+<div *ngIf="is_loged" class="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-3">
+    <div> <!--Estado de los componentes-->
+        <div class="bg-slate-800 rounded-t-md p-3">
+            <div class="font-bold flex justify-between items-center">
+                
+                Estado de los componentes  <span class="text-xs text-green-600">{{ fecha_act | date : 'medium'}}</span>
+            </div>
+        </div>
+        
+        <div class="bg-slate-700 rounded-b-md p-3 font-mono text-xl flex flex-col gap-2">
+            <div class="flex gap-2 items-center justify-between group">
+                <div class="flex flex-row items-center gap-2">
+                    <!-- <div class="h-4 w-4 bg-green-500 animate-pulse rounded-full"></div> -->
+                    
+                    <div class="text-green-500 text-3xl animate-pulse p-2"> <i class="fa-solid fa-temperature-quarter"></i> </div>
+                    
+                    Temperatura de la casa
+                </div>
+                
+                <div class="flex items-center gap-2 animate-pulse">
+                    {{state_compontens.temp[1] || "-" }}°C
+                </div>
+            </div>
+            <div class="flex gap-2 items-center justify-between group">
+                <div class="flex flex-row items-center gap-2">
+                    <!-- <div class="h-4 w-4 bg-red-500 animate-pulse rounded-full"></div> -->
+                    <div class="text-3xl p-2" [ngClass]="state_compontens.light ? 'text-green-500 animate-pulse': 'text-red-500'"> 
+                        <i class="fa-regular fa-lightbulb"></i> 
+                    </div>
+                    Luces de la casa
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <span class="group-hover:visible invisible text-sm">Control manual</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" [(ngModel)]="state_compontens.light" class="sr-only peer" (change)="control('light', $event)">
+                        <div class="group peer ring-0 bg-rose-400  rounded-full outline-none duration-300 after:duration-300 w-12 h-6  shadow-md peer-checked:bg-emerald-500  peer-focus:outline-none after:rounded-full after:absolute after:bg-gray-50 after:outline-none after:h-4 after:w-4 after:top-1 after:left-1 after:-rotate-180 after:flex after:justify-center after:items-center peer-checked:after:translate-x-6 peer-hover:after:scale-60 peer-checked:after:rotate-0">
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <div class="flex gap-2 items-center justify-between group">
+                <div class="flex flex-row items-center gap-2">
+                    <!-- <div class="h-4 w-4 bg-red-500 animate-pulse rounded-full"></div> -->
+                    <div class="text-3xl p-2" [ngClass]="state_compontens.air ? 'text-green-500 animate-spin': 'text-red-500'"> 
+                        <i class="fa-solid fa-fan"></i> 
+                    </div>
+                    
+                    Aire acondicionado
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <span class="group-hover:visible invisible text-sm">Control manual</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" [(ngModel)]="state_compontens.air" class="sr-only peer" (change)="control('air', $event)">
+                        <div class="group peer ring-0 bg-rose-400  rounded-full outline-none duration-300 after:duration-300 w-12 h-6  shadow-md peer-checked:bg-emerald-500  peer-focus:outline-none after:rounded-full after:absolute after:bg-gray-50 after:outline-none after:h-4 after:w-4 after:top-1 after:left-1 after:-rotate-180 after:flex after:justify-center after:items-center peer-checked:after:translate-x-6 peer-hover:after:scale-60 peer-checked:after:rotate-0">
+                        </div>
+                    </label>
+                </div>
+                
+            </div>
+            <div class="flex gap-2 items-center justify-between group">
+                <div class="flex flex-row items-center gap-2">
+                    <!-- <div class="h-4 w-4 bg-red-500 animate-pulse rounded-full"></div> -->
+                    <div class="text-3xl p-2" [ngClass]="state_compontens.alarm ? 'text-green-500 animate-pulse': 'text-red-500'"> 
+                        <i class="fa-solid fa-fire"></i> 
+                    </div>
+                    Alarma de incendio
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <span class="group-hover:visible invisible text-sm">Control manual</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" [(ngModel)]="state_compontens.alarm" class="sr-only peer" (change)="control('alarm', $event)">
+                        <div class="group peer ring-0 bg-rose-400  rounded-full outline-none duration-300 after:duration-300 w-12 h-6  shadow-md peer-checked:bg-emerald-500  peer-focus:outline-none after:rounded-full after:absolute after:bg-gray-50 after:outline-none after:h-4 after:w-4 after:top-1 after:left-1 after:-rotate-180 after:flex after:justify-center after:items-center peer-checked:after:translate-x-6 peer-hover:after:scale-60 peer-checked:after:rotate-0">
+                        </div>
+                    </label>
+                </div>
+                
+            </div>
+            <div class="flex gap-2 items-center justify-between group">
+                <div class="flex flex-row items-center gap-2">
+                    <!-- <div class="h-4 w-4 bg-red-500 animate-pulse rounded-full"></div> -->
+                    <div class="text-3xl p-2" [ngClass]="state_compontens.garage ? 'text-green-500 animate-pulse': 'text-red-500'"> <i class="fa-solid fa-warehouse"></i> </div>
+                    Porton del garage
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <span class="group-hover:visible invisible text-sm">Control manual</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" [(ngModel)]="state_compontens.garage" class="sr-only peer" (change)="control('garage', $event)">
+                        <div class="group peer ring-0 bg-rose-400  rounded-full outline-none duration-300 after:duration-300 w-12 h-6  shadow-md peer-checked:bg-emerald-500  peer-focus:outline-none after:rounded-full after:absolute after:bg-gray-50 after:outline-none after:h-4 after:w-4 after:top-1 after:left-1 after:-rotate-180 after:flex after:justify-center after:items-center peer-checked:after:translate-x-6 peer-hover:after:scale-60 peer-checked:after:rotate-0">
+                        </div>
+                    </label>
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+    <div>  <!--LCD mensajes-->
+        <div class="bg-slate-800 rounded-t-md p-3">
+            <div class="font-bold">
+                LCD
+            </div>
+        </div>
+        
+        <div class="bg-slate-700 rounded-b-md p-3 font-mono text-xl flex flex-col gap-2 group">
+            <div class="flex gap-2 items-center justify-between group">
+                <div class="flex flex-row items-center gap-2">
+                    <div class="h-4 w-4 bg-green-500 animate-pulse rounded-full"></div>
+                    Ver mensaje en la LCD
+                </div>
+                
+                <div class="flex items-center gap-2 animate-pulse">
+                    <span class="group-hover:visible invisible text-sm">Tiempo restante</span>
+                    {{tiempo_msj}}s
+                </div>
+            </div>
+            <div >
+                <label class="sr-only" for="msg">Escribe tu mensaje</label>
+                <input placeholder="Mensaje a mostrar"
+                    class="appearance-none relative block w-full px-3 py-3 border border-gray-700 bg-gray-600 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                    required=""  type="text" name="msg"
+                    maxlength="20" autocomplete="off"
+                    [(ngModel)]="texto_msj"
+                    id="msg" />
+            </div>
+            <div class="flex justify-center items-center">
+                <button
+                    class="w-1/2 items-center py-3 px-4 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:bg-violet-700"
+                    [ngClass]="{'animate-pulse': tiempo_msj < 15}"
+                    [disabled]="tiempo_msj<15"
+                    (click)="enviar_msg()">
+                    >
+                    <span *ngIf="tiempo_msj==15" ngif >Enviar</span>
+                    <span *ngIf="tiempo_msj<15" ngif >Mostrando en pantalla ...</span>
+                </button>
+            </div>
+            
+        </div>
+        
+    </div>
+    <div>  <!--Notificaciones-->
+        <div class="bg-slate-800 rounded-t-md p-3">
+            <div class="font-bold">
+                Notificaciones
+            </div>
+        </div>
+        
+        <div class="bg-slate-700 rounded-b-md p-3 font-mono text-xl flex flex-col gap-2">
+           
+            <div class="bg-slate-800 p-2 rounded-md flex flex-col group" *ngFor="let item of mensajes">
+                <span class="text-sm text-gray-300">
+                    {{ item.fec | date : 'short' }}
+                    <span class="group-hover:visible invisible text-green-400"> - Fecha de registro</span>
+                </span> 
+
+                <span class="text-lg">{{item.text}}</span>
+            </div>
+            <div class="bg-slate-800 p-2 rounded-md flex justify-center items-center gap-2" *ngIf="mensajes.length == 0">
+                No hay mensajes <i class="fa-solid fa-face-frown-open"></i>
+            </div>
+        </div>        
+    </div>
+</div>
+
